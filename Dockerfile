@@ -16,7 +16,7 @@ RUN apk add --no-cache \
   bash \
   minify
 
-COPY --from=font /usr/share/fonts/ttf-montserrat/*.ttf /usr/share/fonts/ttf-montserrat/
+COPY --from=font /usr/share/fonts/ttf-montserrat/static/*.ttf /usr/share/fonts/ttf-montserrat/
 
 RUN mkdir /app
 
