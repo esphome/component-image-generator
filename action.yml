@@ -1,0 +1,14 @@
+name: ESPHome Component Image Generator
+description: Generates SVG images for components to be used on the ESPHome website
+
+inputs:
+  component:
+    description: "The component to generate an image for"
+    required: true
+    type: string
+
+runs:
+  using: docker
+  image: docker://ghcr.io/esphome/component-image-generator:latest
+  args:
+    - ${{ inputs.component }}
