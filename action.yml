@@ -1,6 +1,10 @@
 name: ESPHome Component Image Generator
 description: Generates SVG images for components to be used on the ESPHome website
 
+branding:
+  icon: image
+  color: white
+
 inputs:
   component:
     description: "The component to generate an image for"
