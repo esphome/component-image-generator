@@ -12,7 +12,9 @@ basedir=$(dirname "$0")
 
 text="component-text"
 
-sed s/COMPONENT/$name/ <$basedir/template.svg >/tmp/$lower_name.svg
+# Convert underscores to spaces in generated image text
+name="${name//_/ }"
+sed "s/COMPONENT/$name/" <$basedir/template.svg >/tmp/$lower_name.svg
 
 width=$(inkscape --actions="select-by-id:$text; query-width;" /tmp/$lower_name.svg 2>/dev/null)
 width=$(printf '%.*f' 0 $width)
