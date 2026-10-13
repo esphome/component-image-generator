@@ -1,0 +1,46 @@
+{
+  "name": "@esphome/component-image-generator",
+  "version": "2.0.0",
+  "description": "Generates SVG name badges for ESPHome components, used on the ESPHome website",
+  "license": "Apache-2.0",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/esphome/component-image-generator.git"
+  },
+  "main": "./src/index.js",
+  "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "esphome-component-image": "./src/cli.js"
+  },
+  "files": [
+    "src/*.js",
+    "types/index.d.ts",
+    "ttf-montserrat/static/Montserrat-Black.ttf",
+    "ttf-montserrat/OFL.txt"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "node --test",
+    "test:coverage": "node --test --experimental-test-coverage",
+    "component-image": "node src/cli.js"
+  },
+  "dependencies": {
+    "opentype.js": "^2.0.0"
+  },
+  "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
+    "@types/node": "^22",
+    "typescript": "^7.0.2"
+  }
+}

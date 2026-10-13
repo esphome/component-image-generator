@@ -9,10 +9,17 @@ inputs:
   component:
     description: "The component to generate an image for"
     required: true
-    type: string
 
 runs:
-  using: docker
-  image: docker://ghcr.io/esphome/component-image-generator:latest
-  args:
-    - ${{ inputs.component }}
+  using: composite
+  steps:
+    - name: Install dependencies
+      shell: bash
+      working-directory: ${{ github.action_path }}
+      run: npm ci --omit=dev --ignore-scripts
+
+    - name: Generate image
+      shell: bash
+      env:
+        COMPONENT: ${{ inputs.component }}
+      run: node "$GITHUB_ACTION_PATH/src/cli.js" "$COMPONENT"
