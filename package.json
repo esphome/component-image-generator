@@ -1,6 +1,6 @@
 {
   "name": "@esphome/component-image-generator",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Generates SVG name badges for ESPHome components, used on the ESPHome website",
   "license": "Apache-2.0",
   "type": "module",
@@ -50,7 +50,7 @@
   },
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
-    "@types/node": "^22",
+    "@types/node": "^26",
     "astro": "^7.3.6",
     "prettier": "^3.9.10",
     "prettier-plugin-astro": "^1.1.1",
