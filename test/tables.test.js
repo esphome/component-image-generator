@@ -63,21 +63,38 @@ function fontWithGpos(gpos) {
 
 test("readKerning: format 1 pair set, direct lookup, ignores other lookup types", () => {
   const g = new DataView(new ArrayBuffer(200));
-  const w = (/** @type {number} */ o, /** @type {number} */ v) => g.setUint16(o, v);
+  const w = (/** @type {number} */ o, /** @type {number} */ v) =>
+    g.setUint16(o, v);
   w(8, 10); // lookupList at 10
   w(10, 2); // two lookups
   w(12, 6); // lookup 0 at 10+6
   w(14, 60); // lookup 1 at 10+60
   // lookup 0: type 2, 1 subtable at +8 (relative to lookup start 16)
-  w(16, 2); w(18, 0); w(20, 1); w(22, 8);
+  w(16, 2);
+  w(18, 0);
+  w(20, 1);
+  w(22, 8);
   // subtable at 24: format 1, coverage +14, vf1 = 4 (xAdvance), vf2 = 0, 1 pairset
-  w(24, 1); w(26, 14); w(28, 4); w(30, 0); w(32, 1); w(34, 20);
+  w(24, 1);
+  w(26, 14);
+  w(28, 4);
+  w(30, 0);
+  w(32, 1);
+  w(34, 20);
   // coverage at 38: format 1, glyph 5
-  w(38, 1); w(40, 1); w(42, 5);
+  w(38, 1);
+  w(40, 1);
+  w(42, 5);
   // pair set at 44: 2 pairs (second glyph, xAdvance)
-  w(44, 2); w(46, 6); g.setInt16(48, -40); w(50, 7); g.setInt16(52, -10);
+  w(44, 2);
+  w(46, 6);
+  g.setInt16(48, -40);
+  w(50, 7);
+  g.setInt16(52, -10);
   // lookup 1 at 70: type 1 (ignored)
-  w(70, 1); w(72, 0); w(74, 0);
+  w(70, 1);
+  w(72, 0);
+  w(74, 0);
   const font = fontWithGpos(new Uint8Array(g.buffer));
   const features = [
     { tag: "kern", feature: { lookupListIndexes: [0, 1] } },
@@ -115,7 +132,13 @@ test("ligature substitution", () => {
       lookupType: 4,
       subtables: [
         {
-          coverage: { format: 2, ranges: [{ start: 3, end: 4 }, { start: 8, end: 9 }] },
+          coverage: {
+            format: 2,
+            ranges: [
+              { start: 3, end: 4 },
+              { start: 8, end: 9 },
+            ],
+          },
           ligatureSets: [
             [{ ligGlyph: 200, components: [5, 6] }],
             [{ ligGlyph: 201, components: [5] }],

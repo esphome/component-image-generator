@@ -39,7 +39,9 @@ function coverageIndex(coverage, glyph) {
     return /** @type {number[]} */ (coverage.glyphs).indexOf(glyph);
   }
   let base = 0;
-  for (const r of /** @type {{ start: number, end: number }[]} */ (coverage.ranges)) {
+  for (const r of /** @type {{ start: number, end: number }[]} */ (
+    coverage.ranges
+  )) {
     if (glyph >= r.start && glyph <= r.end) return base + glyph - r.start;
     base += r.end - r.start + 1;
   }
@@ -77,7 +79,10 @@ export function createLigatureSubstituter(features, lookups) {
           (lig) => lig.components.every((c, k) => glyphs[i + 1 + k] === c),
         );
         if (match) {
-          out.push({ glyph: match.ligGlyph, chars: match.components.length + 1 });
+          out.push({
+            glyph: match.ligGlyph,
+            chars: match.components.length + 1,
+          });
           i += match.components.length;
           replaced = true;
           break;

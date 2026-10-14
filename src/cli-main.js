@@ -58,7 +58,7 @@ export function main(argv, io) {
   }
   if (!isValidComponentName(name)) {
     io.stderr(
-      `Invalid component name "${name}": only letters, digits, underscores and spaces are allowed.\n`,
+      `Invalid component name "${name}": only letters, digits, underscores, hyphens and spaces are allowed.\n`,
     );
     return 2;
   }
@@ -69,7 +69,9 @@ export function main(argv, io) {
     mkdirSync(outDir, { recursive: true });
     writeFileSync(file, generateComponentImage(name));
   } catch (err) {
-    io.stderr(`Failed to write ${file}: ${/** @type {Error} */ (err).message}\n`);
+    io.stderr(
+      `Failed to write ${file}: ${/** @type {Error} */ (err).message}\n`,
+    );
     return 1;
   }
   io.stdout(`${file}\n`);

@@ -1,5 +1,6 @@
-import { readFileSync } from "node:fs";
+import { Buffer } from "node:buffer";
 import opentype from "opentype.js";
+import FONT_BASE64 from "./font-data.js";
 import { readKerning } from "./kerning.js";
 import { createLigatureSubstituter } from "./ligatures.js";
 
@@ -11,11 +12,6 @@ const TEXT_BASELINE = 21;
 const FONT_SIZE = 25;
 /** Extra space after each glyph, in px. */
 const LETTER_SPACING = 1.1;
-
-const FONT_URL = new URL(
-  "../ttf-montserrat/static/Montserrat-Black.ttf",
-  import.meta.url,
-);
 
 /**
  * @typedef {object} LoadedFont
@@ -33,8 +29,11 @@ let cachedFont;
  */
 function getFont() {
   if (cachedFont === undefined) {
-    const buf = readFileSync(FONT_URL);
-    const bytes = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
+    const buf = Buffer.from(FONT_BASE64, "base64");
+    const bytes = buf.buffer.slice(
+      buf.byteOffset,
+      buf.byteOffset + buf.byteLength,
+    );
     const font = opentype.parse(bytes);
     const { gpos, gsub } = font.tables;
     cachedFont = {
@@ -94,12 +93,12 @@ function escapeAttr(s) {
 
 /**
  * Whether a name is acceptable as a component name (letters, digits,
- * underscores and spaces, at least one character).
+ * underscores, hyphens and spaces, at least one character).
  * @param {string} name
  * @returns {boolean}
  */
 export function isValidComponentName(name) {
-  return /^[A-Za-z0-9_ ]+$/.test(name);
+  return /^[A-Za-z0-9_ -]+$/.test(name);
 }
 
 /**
@@ -112,17 +111,27 @@ export function componentImageFileName(name) {
 }
 
 /**
- * Generate the SVG markup for a component name badge.
+ * @typedef {object} ComponentBadge
+ * @property {string} label Human readable text (underscores as spaces).
+ * @property {number} width ViewBox width.
+ * @property {number} height ViewBox height.
+ * @property {string} viewBox The SVG viewBox attribute value.
+ * @property {string} body Inner SVG markup (the background and text paths).
+ */
+
+/**
+ * Compute the pieces of a component name badge, without the outer `<svg>`
+ * element, so it can be inlined into HTML or wrapped by a framework.
  *
  * @param {string} name Component name. Underscores are rendered as spaces.
- * @returns {string} The SVG document.
+ * @returns {ComponentBadge}
  */
-export function generateComponentImage(name) {
-  const text = name.replaceAll("_", " ");
+export function renderComponentBadge(name) {
+  const label = name.replaceAll("_", " ");
   const { font, kerning, substitute } = getFont();
   const scale = FONT_SIZE / font.unitsPerEm;
   const clusters = substitute(
-    Array.from(text, (ch) => font.charToGlyph(ch).index),
+    Array.from(label, (ch) => font.charToGlyph(ch).index),
   );
   const path = new opentype.Path();
   let x = TEXT_X;
@@ -131,19 +140,37 @@ export function generateComponentImage(name) {
     path.extend(glyph.getPath(x, TEXT_BASELINE, FONT_SIZE));
     // Like Inkscape, letter spacing is added once per source character, so a
     // ligature covering several characters gets that many spacings.
-    x += /** @type {number} */ (glyph.advanceWidth) * scale + LETTER_SPACING * chars;
+    x +=
+      /** @type {number} */ (glyph.advanceWidth) * scale +
+      LETTER_SPACING * chars;
     const next = clusters[i + 1];
     if (next) x += kerning.get(index, next.glyph) * scale;
   });
   const box = path.getBoundingBox();
-  const width = Math.round(box.x2 - box.x1);
-  const viewWidth = width + 10;
-  const h = width + 5;
+  const width = Math.round(box.x2 - box.x1) + 10;
+  const h = width - 5;
   const rect = `M5,0H${h}a5 5 0 0 1 5 5v15a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5Z`;
-  return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${viewWidth} ${HEIGHT}" role="img" aria-label="${escapeAttr(text)}">` +
-    `<path d="${rect}" fill="#000"/>` +
-    `<path d="${pathData(path.commands.filter((c) => c.type !== "Z"))}" fill="#fffffc"/>` +
-    `</svg>\n`
-  );
+  const commands = path.commands.filter((c) => c.type !== "Z");
+  let body = `<path d="${rect}" fill="#000"/>`;
+  if (commands.length > 0) {
+    body += `<path d="${pathData(commands)}" fill="#fffffc"/>`;
+  }
+  return Object.freeze({
+    label,
+    width,
+    height: HEIGHT,
+    viewBox: `0 0 ${width} ${HEIGHT}`,
+    body,
+  });
+}
+
+/**
+ * Generate the SVG markup for a component name badge.
+ *
+ * @param {string} name Component name. Underscores are rendered as spaces.
+ * @returns {string} The SVG document.
+ */
+export function generateComponentImage(name) {
+  const { label, viewBox, body } = renderComponentBadge(name);
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" role="img" aria-label="${escapeAttr(label)}">${body}</svg>\n`;
 }

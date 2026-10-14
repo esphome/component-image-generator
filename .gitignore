@@ -1,1 +1,4 @@
 node_modules/
+.astro/
+test/fixtures/**/dist/
+test/fixtures/**/node_modules/

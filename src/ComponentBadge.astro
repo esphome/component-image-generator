@@ -1,0 +1,19 @@
+---
+import { renderComponentBadge } from "./index.js";
+
+interface Props extends Omit<astroHTML.JSX.SVGAttributes, "name"> {
+  name: string;
+}
+
+const { name, ...attrs } = Astro.props;
+const badge = renderComponentBadge(name);
+---
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox={badge.viewBox}
+  role="img"
+  aria-label={badge.label}
+  {...attrs}
+  set:html={badge.body}
+/>

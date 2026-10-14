@@ -35,7 +35,11 @@ declare module "opentype.js" {
         lookups: {
           lookupType: number;
           subtables: {
-            coverage: { format: number; glyphs?: number[]; ranges?: { start: number; end: number }[] };
+            coverage: {
+              format: number;
+              glyphs?: number[];
+              ranges?: { start: number; end: number }[];
+            };
             ligatureSets?: { ligGlyph: number; components: number[] }[][];
           }[];
         }[];
