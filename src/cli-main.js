@@ -58,7 +58,7 @@ export function main(argv, io) {
   }
   if (!isValidComponentName(name)) {
     io.stderr(
-      `Invalid component name "${name}": only letters, digits, underscores and spaces are allowed.\n`,
+      `Invalid component name "${name}": only letters, digits, underscores, hyphens and spaces are allowed.\n`,
     );
     return 2;
   }

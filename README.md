@@ -10,7 +10,7 @@ It is pure JavaScript (Node.js 22 or newer): the text is laid out and converted 
 npx github:esphome/component-image-generator ESPHome
 ```
 
-This writes `esphome.svg` (the lowercased name plus `.svg`) to the current directory. Underscores in the name are rendered as spaces. Names may only contain letters, digits, underscores and spaces.
+This writes `esphome.svg` (the lowercased name plus `.svg`) to the current directory. Underscores in the name are rendered as spaces. Names may only contain letters, digits, underscores, hyphens and spaces.
 
 <!-- prettier-ignore -->
 | Option                                           | Description                                      |

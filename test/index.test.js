@@ -65,6 +65,11 @@ const inkscapeWidths = {
   fi: 19,
   fl: 18,
   AV: 41,
+  // Hyphens.
+  "ESP-NOW": 137,
+  "1-Wire": 90,
+  "PZEM-004T": 161,
+  "Z-WAVE": 114,
 };
 
 for (const [name, width] of Object.entries(inkscapeWidths)) {
@@ -110,7 +115,8 @@ test("name validation", () => {
   assert.equal(isValidComponentName("wi_fi 2"), true);
   assert.equal(isValidComponentName(""), false);
   assert.equal(isValidComponentName("../etc"), false);
-  assert.equal(isValidComponentName("a-b"), false);
+  assert.equal(isValidComponentName("ESP-NOW"), true);
+  assert.equal(isValidComponentName("a.b"), false);
 });
 
 test("file name is the lowercased name", () => {

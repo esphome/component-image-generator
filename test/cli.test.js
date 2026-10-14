@@ -99,7 +99,7 @@ test("main rejects extra positionals", () => {
 });
 
 test("main rejects invalid names", () => {
-  for (const bad of ["../evil", "a-b", "a/b", ""]) {
+  for (const bad of ["../evil", "a.b", "a/b", ""]) {
     const { io, err } = capture();
     assert.equal(main([bad], io), 2, bad);
     assert.match(err.join(""), /Invalid component name/);
@@ -149,7 +149,7 @@ test("bin: -o writes to another directory", () => {
 });
 
 test("bin: failures exit non-zero with a message", () => {
-  for (const args of [[], ["bad-name"], ["--unknown", "a"]]) {
+  for (const args of [[], ["bad.name"], ["--unknown", "a"]]) {
     const res = spawnSync(process.execPath, [CLI, ...args], {
       encoding: "utf8",
     });

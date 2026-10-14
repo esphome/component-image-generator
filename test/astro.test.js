@@ -34,7 +34,7 @@ test("badgeStaticPaths rejects names that collide when lowercased", () => {
 });
 
 test("badgeStaticPaths rejects invalid names", () => {
-  assert.throws(() => badgeStaticPaths(["a-b"]), /Invalid component name/);
+  assert.throws(() => badgeStaticPaths(["a.b"]), /Invalid component name/);
   assert.throws(() => badgeStaticPaths([""]), /Invalid component name/);
   assert.throws(
     () => badgeStaticPaths(/** @type {any} */ ([42])),
@@ -78,6 +78,6 @@ test("createBadgeEndpoint with sync and async functions and a param", async () =
 });
 
 test("createBadgeEndpoint surfaces invalid names from getStaticPaths", async () => {
-  const endpoint = createBadgeEndpoint(["bad-name"]);
+  const endpoint = createBadgeEndpoint(["bad.name"]);
   await assert.rejects(endpoint.getStaticPaths(), /Invalid component name/);
 });

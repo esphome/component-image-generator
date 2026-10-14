@@ -93,12 +93,12 @@ function escapeAttr(s) {
 
 /**
  * Whether a name is acceptable as a component name (letters, digits,
- * underscores and spaces, at least one character).
+ * underscores, hyphens and spaces, at least one character).
  * @param {string} name
  * @returns {boolean}
  */
 export function isValidComponentName(name) {
-  return /^[A-Za-z0-9_ ]+$/.test(name);
+  return /^[A-Za-z0-9_ -]+$/.test(name);
 }
 
 /**
