@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -119,16 +125,24 @@ test("main reports write failures", () => {
 
 test("bin: generates a file in the working directory", () => {
   withTempDir((dir) => {
-    const res = spawnSync(process.execPath, [CLI, "ESPHome"], { cwd: dir, encoding: "utf8" });
+    const res = spawnSync(process.execPath, [CLI, "ESPHome"], {
+      cwd: dir,
+      encoding: "utf8",
+    });
     assert.equal(res.status, 0, res.stderr);
     assert.equal(res.stdout, "esphome.svg\n");
-    assert.equal(readFileSync(join(dir, "esphome.svg"), "utf8"), generateComponentImage("ESPHome"));
+    assert.equal(
+      readFileSync(join(dir, "esphome.svg"), "utf8"),
+      generateComponentImage("ESPHome"),
+    );
   });
 });
 
 test("bin: -o writes to another directory", () => {
   withTempDir((dir) => {
-    const res = spawnSync(process.execPath, [CLI, "Dallas_Temp", "-o", dir], { encoding: "utf8" });
+    const res = spawnSync(process.execPath, [CLI, "Dallas_Temp", "-o", dir], {
+      encoding: "utf8",
+    });
     assert.equal(res.status, 0, res.stderr);
     assert.ok(existsSync(join(dir, "dallas_temp.svg")));
   });
@@ -136,7 +150,9 @@ test("bin: -o writes to another directory", () => {
 
 test("bin: failures exit non-zero with a message", () => {
   for (const args of [[], ["bad-name"], ["--unknown", "a"]]) {
-    const res = spawnSync(process.execPath, [CLI, ...args], { encoding: "utf8" });
+    const res = spawnSync(process.execPath, [CLI, ...args], {
+      encoding: "utf8",
+    });
     assert.notEqual(res.status, 0);
     assert.notEqual(res.stderr, "");
     assert.equal(res.stdout, "");
@@ -144,7 +160,9 @@ test("bin: failures exit non-zero with a message", () => {
 });
 
 test("bin: --help exits 0", () => {
-  const res = spawnSync(process.execPath, [CLI, "--help"], { encoding: "utf8" });
+  const res = spawnSync(process.execPath, [CLI, "--help"], {
+    encoding: "utf8",
+  });
   assert.equal(res.status, 0);
   assert.match(res.stdout, /Usage:/);
 });

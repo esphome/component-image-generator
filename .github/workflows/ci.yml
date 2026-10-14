@@ -15,17 +15,53 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    name: Typecheck and test
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
 
       - run: npm ci
+      - run: npm run format:check
       - run: npm run typecheck
-      - run: npm test
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+      - run: npm run test:coverage
+      - name: Check the embedded font is up to date
+        run: |
+          npm run embed-font
+          git diff --exit-code -- src/font-data.js
+      - name: Check the reference badge is up to date
+        run: |
+          node src/cli.js ESPHome
+          git diff --exit-code -- esphome.svg
+      - run: npm pack --dry-run
+
+  action:
+    name: Action smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./
+        with:
+          component: dallas_temp
+
+      - name: Check the badge was written
+        run: grep -q 'aria-label="dallas temp"' dallas_temp.svg

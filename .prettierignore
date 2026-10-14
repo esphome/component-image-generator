@@ -1,0 +1,8 @@
+node_modules
+package-lock.json
+*.svg
+test/fixtures/**/dist
+test/fixtures/**/.astro
+test/fixtures/**/node_modules
+ttf-montserrat
+src/font-data.js

@@ -12,6 +12,7 @@ npx github:esphome/component-image-generator ESPHome
 
 This writes `esphome.svg` (the lowercased name plus `.svg`) to the current directory. Underscores in the name are rendered as spaces. Names may only contain letters, digits, underscores and spaces.
 
+<!-- prettier-ignore -->
 | Option                                           | Description                                      |
 | ------------------------------------------------ | ------------------------------------------------ |
 | `-o`, `--out-dir DIR`                            | Directory to write the SVG to (default: current) |
@@ -46,10 +47,58 @@ npm run component-image -- my_component -o public/images
 ## Programmatic API
 
 ```js
-import { generateComponentImage } from "@esphome/component-image-generator";
+import {
+  generateComponentImage,
+  renderComponentBadge,
+} from "@esphome/component-image-generator";
 
-const svg = generateComponentImage("dallas_temp"); // SVG markup as a string
+const svg = generateComponentImage("dallas_temp"); // standalone SVG document
+
+const badge = renderComponentBadge("dallas_temp");
+// { label: "dallas temp", width: 178, height: 25, viewBox: "0 0 178 25", body: "<path .../><path .../>" }
 ```
+
+Output is deterministic: the same name always gives byte-identical SVG. The font is embedded in the library (`src/font-data.js`, generated from the bundled TTF by `npm run embed-font`), so it keeps working after a bundler such as Vite or Astro has inlined it.
+
+## Astro
+
+The package works with Astro 5 or newer (`astro` is an optional peer dependency).
+
+### Inline component
+
+```astro
+---
+import ComponentBadge from "@esphome/component-image-generator/ComponentBadge.astro";
+---
+
+<ComponentBadge name="dallas_temp" class="component-badge" height="25" />
+```
+
+`name` is the component name. Every other prop is passed through to the `<svg>` element and overrides the defaults (`viewBox`, `role="img"` and an `aria-label` with the badge text).
+
+### Static `.svg` endpoint
+
+To serve badges as files (for example for lazily loaded `<img>` tags), create a dynamic endpoint such as `src/pages/images/[name].svg.ts`:
+
+```ts
+import { createBadgeEndpoint } from "@esphome/component-image-generator/astro";
+
+export const { getStaticPaths, GET } = createBadgeEndpoint(async () => {
+  // Any iterable of component names, or a (possibly async) function returning one.
+  return ["ESPHome", "dallas_temp"];
+});
+```
+
+A static build then writes `images/esphome.svg` and `images/dallas_temp.svg`, identical to the CLI output. The route parameter is the lowercased name; pass `{ param: "slug" }` as the second argument if your file is named `[slug].svg.ts`. The build fails if a name is invalid or two names collide once lowercased (exact duplicates are ignored).
+
+The building blocks are exported too, for custom endpoints:
+
+<!-- prettier-ignore -->
+| Export                                                  | Description                                             |
+| ------------------------------------------------------- | ------------------------------------------------------- |
+| `badgeStaticPaths(names, options?)`                     | `getStaticPaths` entries: `{ params: { name }, props }` |
+| `badgeResponse(name)`                                   | `Response` with the SVG and an `image/svg+xml` type     |
+| `createBadgeEndpoint(names, opts?)`                     | `{ getStaticPaths, GET, prerender: true }` for a route  |
 
 ## GitHub Action
 
@@ -65,10 +114,13 @@ The image is written to the workspace as `esphome.svg`.
 
 ```bash
 npm ci
+npm run format:check
 npm run typecheck
 npm test
-npm run test:coverage
+npm run test:coverage   # enforces 100% line, branch and function coverage
 ```
+
+`npm test` includes an integration test that builds a small Astro site (`test/fixtures/astro-site`) using both the component and the endpoint helper.
 
 Optionally, compare the output with the original Inkscape based pipeline (needs `inkscape` and Montserrat installed where fontconfig can find it; not run in CI):
 

@@ -1,9 +1,16 @@
 import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 import {
   componentImageFileName,
   generateComponentImage,
   isValidComponentName,
+  renderComponentBadge,
 } from "../src/index.js";
 
 /**
@@ -29,7 +36,9 @@ test("rounded rectangle uses the text width", () => {
   const svg = generateComponentImage("ESPHome");
   const vw = viewBoxWidth(svg);
   assert.ok(
-    svg.includes(`<path d="M5,0H${vw - 5}a5 5 0 0 1 5 5v15a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5Z"`),
+    svg.includes(
+      `<path d="M5,0H${vw - 5}a5 5 0 0 1 5 5v15a5 5 0 0 1-5 5H5a5 5 0 0 1-5-5V5a5 5 0 0 1 5-5Z"`,
+    ),
   );
 });
 
@@ -75,7 +84,10 @@ test("labels are XML escaped", () => {
 });
 
 test("output is deterministic and font is reused", () => {
-  assert.equal(generateComponentImage("sensor"), generateComponentImage("sensor"));
+  assert.equal(
+    generateComponentImage("sensor"),
+    generateComponentImage("sensor"),
+  );
 });
 
 test("every glyph subpath is closed and no -0 is emitted", () => {
@@ -103,4 +115,61 @@ test("name validation", () => {
 
 test("file name is the lowercased name", () => {
   assert.equal(componentImageFileName("Wi_Fi"), "wi_fi.svg");
+});
+
+test("renderComponentBadge returns the badge parts", () => {
+  const badge = renderComponentBadge("dallas_temp");
+  assert.equal(badge.label, "dallas temp");
+  assert.equal(badge.height, 25);
+  assert.equal(badge.width, 178);
+  assert.equal(badge.viewBox, "0 0 178 25");
+  assert.match(
+    badge.body,
+    /^<path d="[^"]+" fill="#000"\/><path d="[^"]+" fill="#fffffc"\/>$/,
+  );
+  assert.ok(Object.isFrozen(badge));
+});
+
+test("generateComponentImage is built from renderComponentBadge", () => {
+  const badge = renderComponentBadge("ESPHome");
+  assert.equal(
+    generateComponentImage("ESPHome"),
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${badge.viewBox}" role="img" aria-label="ESPHome">${badge.body}</svg>\n`,
+  );
+});
+
+for (const name of ["", "   "]) {
+  test(`name ${JSON.stringify(name)} renders only the background`, () => {
+    const badge = renderComponentBadge(name);
+    assert.equal(badge.width, 10);
+    assert.equal(badge.viewBox, "0 0 10 25");
+    assert.equal(badge.body.match(/<path /g)?.length, 1);
+    assert.ok(!badge.body.includes('d="Z"'));
+    assert.ok(!generateComponentImage(name).includes("#fffffc"));
+  });
+}
+
+test("embedded font matches the bundled TTF", async () => {
+  const { default: base64 } = await import("../src/font-data.js");
+  const ttf = readFileSync(
+    new URL("../ttf-montserrat/static/Montserrat-Black.ttf", import.meta.url),
+  );
+  assert.ok(Buffer.from(base64, "base64").equals(ttf));
+});
+
+test("embed-font script regenerates src/font-data.js exactly", () => {
+  const dir = mkdtempSync(join(tmpdir(), "embed-font-"));
+  try {
+    const out = join(dir, "font-data.js");
+    execFileSync(process.execPath, [
+      fileURLToPath(new URL("../scripts/embed-font.mjs", import.meta.url)),
+      out,
+    ]);
+    assert.equal(
+      readFileSync(out, "utf8"),
+      readFileSync(new URL("../src/font-data.js", import.meta.url), "utf8"),
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

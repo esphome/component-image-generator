@@ -69,7 +69,9 @@ export function main(argv, io) {
     mkdirSync(outDir, { recursive: true });
     writeFileSync(file, generateComponentImage(name));
   } catch (err) {
-    io.stderr(`Failed to write ${file}: ${/** @type {Error} */ (err).message}\n`);
+    io.stderr(
+      `Failed to write ${file}: ${/** @type {Error} */ (err).message}\n`,
+    );
     return 1;
   }
   io.stdout(`${file}\n`);

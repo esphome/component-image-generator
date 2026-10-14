@@ -15,6 +15,11 @@
       "types": "./types/index.d.ts",
       "default": "./src/index.js"
     },
+    "./astro": {
+      "types": "./types/astro.d.ts",
+      "default": "./src/astro.js"
+    },
+    "./ComponentBadge.astro": "./src/ComponentBadge.astro",
     "./package.json": "./package.json"
   },
   "bin": {
@@ -22,7 +27,9 @@
   },
   "files": [
     "src/*.js",
+    "src/*.astro",
     "types/index.d.ts",
+    "types/astro.d.ts",
     "ttf-montserrat/static/Montserrat-Black.ttf",
     "ttf-montserrat/OFL.txt"
   ],
@@ -31,9 +38,12 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --test",
-    "test:coverage": "node --test --experimental-test-coverage",
-    "component-image": "node src/cli.js"
+    "test": "node --test \"test/*.test.js\"",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-lines=100 --test-coverage-branches=100 --test-coverage-functions=100 --test-coverage-exclude='test/**' \"test/*.test.js\"",
+    "component-image": "node src/cli.js",
+    "embed-font": "node scripts/embed-font.mjs src/font-data.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "opentype.js": "^2.0.0"
@@ -41,6 +51,24 @@
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^22",
+    "astro": "^7.3.6",
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^1.1.1",
     "typescript": "^7.0.2"
+  },
+  "keywords": [
+    "esphome",
+    "svg",
+    "badge",
+    "astro-component",
+    "withastro"
+  ],
+  "peerDependencies": {
+    "astro": ">=5"
+  },
+  "peerDependenciesMeta": {
+    "astro": {
+      "optional": true
+    }
   }
 }
