@@ -51,7 +51,7 @@
   "devDependencies": {
     "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^26",
-    "astro": "^7.3.6",
+    "astro": "^7.4.2",
     "prettier": "^3.9.10",
     "prettier-plugin-astro": "^1.1.1",
     "typescript": "^7.0.2"
